@@ -37,8 +37,7 @@ class BusinessLogicGenerator(BaseGenerator):
 
             for item in payload:
                 tc = self._create_test_case(
-                    name=f"AI_LOGIC - {item.name}",
-                    category="ai_logic",
+                    category=f"AI_LOGIC - {item.name[:35]}",
                     expected_status=item.expected_status,
                     headers={},
                     query_params=item.query_params,

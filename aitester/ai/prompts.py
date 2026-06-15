@@ -48,3 +48,22 @@ Return ONLY a JSON object exactly matching the following format:
 }}
 ```
 """
+
+RISK_ASSESSMENT_PROMPT = """
+You are an expert Security Engineer and CISO. Analyze the following list of security and test findings.
+
+Findings:
+{findings}
+
+Determine the overall security posture and risk to the application.
+Return ONLY a JSON object exactly matching the following format:
+```json
+{{
+  "overall_risk_score": 75,
+  "risk_level": "low" | "medium" | "high" | "critical",
+  "executive_summary": "A 2-3 sentence summary of the security posture",
+  "findings": ["List of key findings summarized"],
+  "remediation_priority": ["List of what to fix first"]
+}}
+```
+"""

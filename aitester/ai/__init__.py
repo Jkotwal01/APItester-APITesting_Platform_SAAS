@@ -1,1 +1,3 @@
-# AI engine (Gemini client, prompts, validators)
+from aitester.ai.client import GeminiClient
+
+__all__ = ["GeminiClient"]

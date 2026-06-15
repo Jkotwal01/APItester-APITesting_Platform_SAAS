@@ -63,7 +63,7 @@ class AILogicGenerator(BaseGenerator):
 
     def _build_prompt(self) -> str:
         """Constructs the prompt for the Gemini model."""
-        endpoint_info = {
+        endpoint_info: dict[str, Any] = {
             "path": self.endpoint.path,
             "method": self.endpoint.method,
             "summary": self.endpoint.summary,

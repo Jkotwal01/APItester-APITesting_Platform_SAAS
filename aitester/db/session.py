@@ -13,13 +13,22 @@ from sqlalchemy.ext.asyncio import (
 
 from aitester.core.config import settings
 
+from sqlalchemy.pool import NullPool
+
+# Define pool arguments dynamically based on environment
+pool_kwargs = {}
+if getattr(settings, "ENVIRONMENT", "").lower() == "testing" or "test" in settings.DATABASE_URL:
+    pool_kwargs["poolclass"] = NullPool
+else:
+    pool_kwargs["pool_size"] = 20
+    pool_kwargs["max_overflow"] = 10
+
 # Create the async engine
 engine: AsyncEngine = create_async_engine(
     settings.DATABASE_URL,
     echo=settings.DEBUG,
-    pool_size=20,
-    max_overflow=10,
     pool_pre_ping=True,
+    **pool_kwargs
 )
 
 # Async session factory

@@ -10,10 +10,9 @@ from sqlalchemy.ext.asyncio import (
     async_sessionmaker,
     create_async_engine,
 )
+from sqlalchemy.pool import NullPool
 
 from aitester.core.config import settings
-
-from sqlalchemy.pool import NullPool
 
 # Define pool arguments dynamically based on environment
 pool_kwargs = {}

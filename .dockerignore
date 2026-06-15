@@ -10,5 +10,4 @@ htmlcov/
 tests/
 docker/
 .github/
-README.md
 docs/

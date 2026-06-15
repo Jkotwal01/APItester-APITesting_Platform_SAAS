@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 
 # Builder stage
-FROM python:3.13-slim as builder
+FROM python:3.13-slim AS builder
 
 WORKDIR /app
 

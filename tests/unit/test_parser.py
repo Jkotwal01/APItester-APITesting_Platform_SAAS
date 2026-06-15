@@ -52,7 +52,7 @@ SAMPLE_SPEC = {
 
 def test_parser_invalid_spec():
     with pytest.raises(SpecParseError):
-        OpenAPIParser([])
+        OpenAPIParser([])  # type: ignore
 
     with pytest.raises(SpecValidationError, match="Missing 'openapi' or 'swagger'"):
         OpenAPIParser({"info": {}})

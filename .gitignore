@@ -1,0 +1,56 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.pyw
+*.pyz
+*.pyzw
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+*.whl
+
+# Virtual environments
+.env
+.venv/
+venv/
+env/
+ENV/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+
+# Testing & Coverage
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+htmlcov/
+.coverage
+*.coverage
+coverage.xml
+
+# Reports (generated output)
+reports/
+*.html
+
+# Alembic
+# (keep migrations, ignore compiled)
+
+# Docker
+docker-compose.override.yml
+
+# Logs
+*.log
+logs/
+
+# Secrets (never commit)
+.env
+.env.local
+.env.production

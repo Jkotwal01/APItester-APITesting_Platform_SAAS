@@ -1,0 +1,84 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.backends.legacy:build"
+
+[project]
+name = "aitester"
+version = "1.0.0"
+description = "AI-Powered Universal API Testing Platform"
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.12"
+keywords = ["api", "testing", "ai", "openapi", "security"]
+
+[project.scripts]
+aitester = "aitester.cli.app:app_runner"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["aitester*"]
+
+# ─── Ruff (linter + formatter) ──────────────────────────────────────────────
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "W", "F", "I", "N", "UP", "B", "SIM", "C4"]
+ignore = [
+    "E501",   # line too long — handled by formatter
+    "B008",   # do not perform function call in default arguments (FastAPI Depends)
+]
+
+[tool.ruff.lint.isort]
+known-first-party = ["aitester"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+line-ending = "lf"
+
+# ─── MyPy (type checker) ────────────────────────────────────────────────────
+[tool.mypy]
+python_version = "3.12"
+strict = false
+ignore_missing_imports = true
+warn_return_any = true
+warn_unused_ignores = true
+no_implicit_optional = true
+check_untyped_defs = true
+
+# ─── Pytest ─────────────────────────────────────────────────────────────────
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_functions = ["test_*"]
+python_classes = ["Test*"]
+addopts = "-v --tb=short"
+filterwarnings = [
+    "ignore::DeprecationWarning",
+    "ignore::PendingDeprecationWarning",
+]
+
+# ─── Coverage ───────────────────────────────────────────────────────────────
+[tool.coverage.run]
+source = ["aitester"]
+omit = [
+    "*/tests/*",
+    "*/migrations/*",
+    "*/alembic/*",
+    "aitester/cli/*",       # CLI is tested via integration
+]
+branch = true
+
+[tool.coverage.report]
+fail_under = 70
+show_missing = true
+skip_covered = false
+exclude_lines = [
+    "pragma: no cover",
+    "if TYPE_CHECKING:",
+    "raise NotImplementedError",
+    "@abstractmethod",
+]

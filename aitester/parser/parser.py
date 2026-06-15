@@ -3,9 +3,10 @@ import urllib.request
 from pathlib import Path
 from urllib.error import URLError
 
+# pyrefly: ignore [missing-source-for-stubs]
 import yaml
-from aitester.core.exceptions import SpecLoadError
 from aitester.parser.models import ParsedSpec
+from aitester.core.exceptions import SpecLoadError
 from aitester.parser.openapi import OpenAPIParser
 
 

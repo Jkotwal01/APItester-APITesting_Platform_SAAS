@@ -2,11 +2,13 @@ import json
 from typing import Any
 
 from aitester.ai.client import GeminiClient
+from aitester.ai.prompts import BUSINESS_LOGIC_PROMPT
+from aitester.ai.validators import validate_business_logic_output
 from aitester.db.models.test_case import TestCase
 from aitester.generators.base import BaseGenerator
 
 
-class AILogicGenerator(BaseGenerator):
+class BusinessLogicGenerator(BaseGenerator):
     """
     Generates business-logic specific test cases using the Gemini AI model.
     """
@@ -30,25 +32,17 @@ class AILogicGenerator(BaseGenerator):
         prompt = self._build_prompt()
 
         try:
-            # We expect a JSON array of objects with 'category', 'description', 'query_params', 'body', 'expected_status'
-            payload = await self.ai_client.generate_test_payload(prompt)
-
-            if not isinstance(payload, list):
-                if isinstance(payload, dict) and "test_cases" in payload:
-                    payload = payload["test_cases"]
-                else:
-                    payload = [payload]
+            # We expect a JSON object matching BusinessLogicOutput schema
+            payload = await self.ai_client.generate_with_retry(prompt, validate_business_logic_output)
 
             for item in payload:
-                if not isinstance(item, dict):
-                    continue
-
                 tc = self._create_test_case(
-                    category=f"AI_LOGIC - {item.get('category', 'Custom')}",
-                    expected_status=item.get("expected_status", 200),
-                    headers=item.get("headers"),
-                    query_params=item.get("query_params"),
-                    body=item.get("body"),
+                    name=f"AI_LOGIC - {item.name}",
+                    category="ai_logic",
+                    expected_status=item.expected_status,
+                    headers={},
+                    query_params=item.query_params,
+                    body=item.request_body,
                 )
                 test_cases.append(tc)
 
@@ -72,26 +66,7 @@ class AILogicGenerator(BaseGenerator):
                 for p in self.endpoint.parameters
             ],
         }
-        if self.endpoint.request_body and self.endpoint.request_body.schema_:
+        if self.endpoint.request_body and getattr(self.endpoint.request_body, "schema_", None):
             endpoint_info["body_schema"] = self.endpoint.request_body.schema_
 
-        prompt = f"""
-You are an expert API QA Engineer. Analyze the following API endpoint specification:
-{json.dumps(endpoint_info, indent=2)}
-
-Generate 3 clever, business-logic-specific test cases that go beyond simple data validation.
-Think about state manipulation, idempotency, realistic user flows, or common business logic flaws.
-
-Return ONLY a JSON array of objects with the following schema:
-[
-  {{
-    "category": "String (e.g., Idempotency, Concurrency, State, Flow)",
-    "description": "String (What this test aims to prove)",
-    "expected_status": Integer (HTTP status code),
-    "headers": {{}} (Optional),
-    "query_params": {{}} (Optional),
-    "body": {{}} (Optional)
-  }}
-]
-"""
-        return prompt.strip()
+        return BUSINESS_LOGIC_PROMPT.format(endpoint_info=json.dumps(endpoint_info, indent=2))

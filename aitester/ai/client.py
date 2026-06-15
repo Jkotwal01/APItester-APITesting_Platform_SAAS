@@ -57,3 +57,41 @@ class GeminiClient:
         except Exception as e:
             logger.error(f"Unexpected AI error: {e}")
             raise AIEngineError(f"Unexpected AI engine error: {e}") from e
+
+    async def generate_with_retry(self, prompt: str, validator: Any, max_retries: int = 3) -> Any:
+        """
+        Sends a prompt to Gemini and validates the output with the provided validator.
+        Retries up to max_retries times if the validation fails.
+        """
+        from aitester.core.exceptions import AIOutputValidationError
+        
+        last_error = None
+        for attempt in range(max_retries):
+            try:
+                # Use JSON mode if supported, or just prompt for JSON
+                response = await self.model.generate_content_async(
+                    prompt,
+                    generation_config=genai.GenerationConfig(response_mime_type="application/json"),
+                )
+
+                content = response.text
+                if not content:
+                    raise AIOutputValidationError("AI returned an empty response.")
+                    
+                return validator(content)
+                
+            except ResourceExhausted as e:
+                logger.error("Gemini API rate limit exceeded.")
+                raise AIRateLimitError("Gemini API rate limit exceeded.") from e
+            except InvalidArgument as e:
+                logger.error(f"Invalid argument to Gemini API: {e}")
+                raise AIEngineError(f"Invalid API argument: {e}") from e
+            except AIOutputValidationError as e:
+                last_error = e
+                logger.warning(f"AI output validation failed on attempt {attempt + 1}: {e}")
+                # We could append the error to the prompt for the next attempt, but simple retry is fine for MVP
+            except Exception as e:
+                last_error = e
+                logger.warning(f"Unexpected AI error on attempt {attempt + 1}: {e}")
+                
+        raise last_error or AIEngineError("Failed to generate valid AI output after max retries.")

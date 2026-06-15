@@ -1,3 +1,4 @@
+from aitester.parser.models import ParsedSpec
 import logging
 from typing import Any
 
@@ -32,11 +33,10 @@ class OpenAPIParser:
         if "paths" not in self.spec:
             raise SpecValidationError("Missing 'paths' field in OpenAPI spec.")
 
-    def parse(self) -> "ParsedSpec":
+    def parse(self) -> ParsedSpec:
         """
         Parses the entire specification and returns a ParsedSpec object.
         """
-        from aitester.parser.models import ParsedSpec
         
         endpoints = []
         paths = self.spec.get("paths", {})

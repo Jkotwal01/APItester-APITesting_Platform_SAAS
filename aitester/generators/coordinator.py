@@ -6,7 +6,7 @@ from aitester.parser.models import ParsedSpec
 from aitester.generators.functional import FunctionalGenerator
 from aitester.generators.edge import EdgeCaseGenerator
 from aitester.security.generator import SecurityGenerator
-from aitester.generators.ai_logic import AILogicGenerator
+from aitester.ai.business_logic import BusinessLogicGenerator
 
 
 class TestGenerationCoordinator:
@@ -43,7 +43,7 @@ class TestGenerationCoordinator:
 
             # AI Logic Tests
             if self.enable_ai and "ai" in self.types:
-                gen = AILogicGenerator(endpoint, test_run_id)
+                gen = BusinessLogicGenerator(endpoint, test_run_id)
                 # We append the coroutine to a list to run them concurrently
                 ai_tasks.append(gen.generate_async())
 

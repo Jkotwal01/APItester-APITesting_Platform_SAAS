@@ -1,0 +1,155 @@
+openapi: 3.0.0
+info:
+  title: Beeceptor Mock API
+  description: Live mock API hosted on Beeceptor for AITester validation
+  version: 1.0.0
+servers:
+  - url: https://mp1bb40fca3d147dbe25.free.beeceptor.com
+    description: Beeceptor Live Mock
+
+paths:
+  /data:
+    get:
+      operationId: getData
+      summary: Get project and summary data
+      description: Returns a list of projects with summary stats and pagination metadata
+      tags:
+        - Data
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - timestamp
+                  - data
+                  - meta
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  timestamp:
+                    type: string
+                    format: date-time
+                    example: "2026-06-15T11:38:00Z"
+                  data:
+                    type: object
+                    required:
+                      - projects
+                      - summary
+                    properties:
+                      projects:
+                        type: array
+                        items:
+                          type: object
+                          required:
+                            - id
+                            - name
+                            - base_url
+                            - version
+                            - status
+                            - created_at
+                            - test_runs_count
+                            - last_run_at
+                            - coverage_percent
+                            - owner
+                          properties:
+                            id:
+                              type: string
+                              example: proj-001
+                            name:
+                              type: string
+                              example: E-Commerce API
+                            base_url:
+                              type: string
+                              format: uri
+                              example: https://api.shop.example.com
+                            version:
+                              type: string
+                              example: v2.3.1
+                            status:
+                              type: string
+                              enum:
+                                - active
+                                - inactive
+                                - archived
+                              example: active
+                            created_at:
+                              type: string
+                              format: date-time
+                            test_runs_count:
+                              type: integer
+                              minimum: 0
+                            last_run_at:
+                              type: string
+                              format: date-time
+                            coverage_percent:
+                              type: number
+                              minimum: 0
+                              maximum: 100
+                            owner:
+                              type: object
+                              required:
+                                - id
+                                - email
+                                - role
+                              properties:
+                                id:
+                                  type: string
+                                email:
+                                  type: string
+                                  format: email
+                                role:
+                                  type: string
+                                  enum:
+                                    - admin
+                                    - developer
+                                    - viewer
+                      summary:
+                        type: object
+                        required:
+                          - total_projects
+                          - total_test_runs
+                          - total_assertions_passed
+                          - total_assertions_failed
+                          - pass_rate_percent
+                        properties:
+                          total_projects:
+                            type: integer
+                            minimum: 0
+                          total_test_runs:
+                            type: integer
+                            minimum: 0
+                          total_assertions_passed:
+                            type: integer
+                            minimum: 0
+                          total_assertions_failed:
+                            type: integer
+                            minimum: 0
+                          pass_rate_percent:
+                            type: number
+                            minimum: 0
+                            maximum: 100
+                  meta:
+                    type: object
+                    required:
+                      - page
+                      - per_page
+                      - total_records
+                      - api_version
+                    properties:
+                      page:
+                        type: integer
+                        minimum: 1
+                      per_page:
+                        type: integer
+                        minimum: 1
+                      total_records:
+                        type: integer
+                        minimum: 0
+                      api_version:
+                        type: string
+                        example: v1

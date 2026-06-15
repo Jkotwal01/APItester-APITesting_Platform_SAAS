@@ -1,5 +1,7 @@
-from pydantic import BaseModel
 from typing import Literal
+
+from pydantic import BaseModel
+
 
 class SecurityFinding(BaseModel):
     vulnerability_type: str
@@ -16,7 +18,7 @@ def calculate_security_score(findings: list[SecurityFinding]) -> float:
     Base score is 100.0. Each finding deducts points based on severity.
     """
     score = 100.0
-    
+
     # Deduction weights based on severity
     weights = {
         "critical": 20.0,
@@ -24,11 +26,11 @@ def calculate_security_score(findings: list[SecurityFinding]) -> float:
         "medium": 5.0,
         "low": 1.0,
     }
-    
+
     for finding in findings:
         deduction = weights.get(finding.severity, 1.0)
         score -= deduction
-        
+
     return max(0.0, min(100.0, score))
 
 def score_to_risk_level(score: float) -> str:

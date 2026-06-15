@@ -6,7 +6,7 @@ from pydantic import BaseModel, ConfigDict, Field
 class ParsedParameter(BaseModel):
     """Represents a parameter in an OpenAPI operation (query, path, header, cookie)."""
     model_config = ConfigDict(populate_by_name=True)
-    
+
     name: str
     in_: str = Field(alias="in")
     required: bool = False
@@ -16,7 +16,7 @@ class ParsedParameter(BaseModel):
 class ParsedRequestBody(BaseModel):
     """Represents the request body schema in an OpenAPI operation."""
     model_config = ConfigDict(populate_by_name=True)
-    
+
     content_type: str
     schema_: dict[str, Any] = Field(alias="schema")
     required: bool = False

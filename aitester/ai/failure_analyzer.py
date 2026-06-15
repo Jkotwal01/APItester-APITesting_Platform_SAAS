@@ -42,11 +42,11 @@ class FailureAnalyzer:
         prompt = FAILURE_ANALYSIS_PROMPT.format(
             test_case=json.dumps(test_case_info, indent=2),
             status_code=test_result.actual_status_code or "Unknown",
-            response_body=test_result.actual_response_body or "None",
+            response_body=test_result.actual_body or "None",
         )
 
         try:
-            analysis = await self.ai_client.generate_with_retry(prompt, validate_failure_analysis_output)
+            analysis: dict[str, Any] = await self.ai_client.generate_with_retry(prompt, validate_failure_analysis_output)
             return analysis
         except Exception as e:
             logger.error(f"Failure analysis failed for test {tc.id}: {e}")

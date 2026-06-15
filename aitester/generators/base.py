@@ -1,3 +1,4 @@
+import uuid
 from abc import ABC, abstractmethod
 from typing import Any
 
@@ -32,6 +33,7 @@ class BaseGenerator(ABC):
     ) -> TestCase:
         """Helper to instantiate a TestCase model."""
         return TestCase(
+            id=uuid.uuid4(),
             test_run_id=self.test_run_id,
             category=category,
             endpoint=self.endpoint.path,

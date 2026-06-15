@@ -1,6 +1,6 @@
 import typer
 
-from aitester.cli.commands import analyze, run, report
+from aitester.cli.commands import analyze, report, run
 
 app = typer.Typer(
     name="aitester",

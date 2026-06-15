@@ -1,10 +1,9 @@
 import pytest
-from httpx import AsyncClient, ASGITransport
+from httpx import ASGITransport, AsyncClient
 
-from tests.fixtures.mock_api import mock_app
-from aitester.parser.parser import parse_spec
-from aitester.generators.coordinator import TestGenerationCoordinator
 from aitester.executor.runner import AsyncTestRunner
+from aitester.generators.coordinator import TestGenerationCoordinator
+from aitester.parser.parser import parse_spec
 
 SIMPLE_SPEC = "tests/fixtures/simple_api.yaml"
 
@@ -22,11 +21,11 @@ async def test_full_pipeline_produces_results():
     # To use ASGITransport with httpx AsyncClient in runner, it's tricky because runner creates its own AsyncClient.
     # But for this test, we can just patch the request method like we did in test_executor.py
     # or start a testserver. Since we are testing integration, let's patch the client
-    
+
     # Actually, a better integration test runs the FastAPI server or mocks the runner's httpx client.
     # The plan says to use httpx with ASGITransport. To do that, we'd need runner to accept a client,
     # or we can patchhttpx.AsyncClient.
-    
+
     # We will just verify the coordinator generates everything.
     # Executing against the mock app directly is hard unless we patch the runner to use the ASGI transport.
     pass
@@ -38,7 +37,7 @@ async def test_coordinator_generates_all_categories():
     coordinator = TestGenerationCoordinator(enable_ai=False)
     all_tests = await coordinator.generate_async(spec, "run1")
     categories = {t.category for t in all_tests}
-    
+
     # It will contain variations like SECURITY_SQLI, FUNCTIONAL, EDGE
     assert any(c.startswith("FUNCTIONAL") for c in categories)
     assert any(c.startswith("EDGE") for c in categories)

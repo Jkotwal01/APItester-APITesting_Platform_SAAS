@@ -1,9 +1,9 @@
 import json
+
 import pytest
 
 from aitester.ai.validators import (
     validate_business_logic_output,
-    AITestCase,
 )
 from aitester.core.exceptions import AIOutputValidationError
 
@@ -79,27 +79,27 @@ class TestAIClientMocked:
         from aitester.ai.client import GeminiClient
         mocker.patch.dict("os.environ", {"GEMINI_API_KEY": "test_key"})
         client = GeminiClient()
-        
+
         # Mock the underlying model to return invalid JSON twice, then valid
         valid_response = json.dumps({"test_cases": []})
-        
+
         # We need to mock the generate_content_async method
         class MockResponse:
             def __init__(self, text):
                 self.text = text
-                
+
         mock_model = mocker.patch.object(
-            client.model, 
+            client.model,
             "generate_content_async",
             side_effect=[
-                MockResponse("not json"), 
-                MockResponse("still bad"), 
+                MockResponse("not json"),
+                MockResponse("still bad"),
                 MockResponse(valid_response)
             ]
         )
-        
+
         result = await client.generate_with_retry("test prompt", validate_business_logic_output)
-        
+
         assert mock_model.call_count == 3
         assert result == []
 
@@ -109,18 +109,18 @@ class TestAIClientMocked:
         from aitester.core.exceptions import AIOutputValidationError
         mocker.patch.dict("os.environ", {"GEMINI_API_KEY": "test_key"})
         client = GeminiClient()
-        
+
         class MockResponse:
             def __init__(self, text):
                 self.text = text
-                
+
         mock_model = mocker.patch.object(
-            client.model, 
+            client.model,
             "generate_content_async",
             return_value=MockResponse("bad json")
         )
-        
+
         with pytest.raises(AIOutputValidationError):
             await client.generate_with_retry("test prompt", validate_business_logic_output, max_retries=2)
-            
+
         assert mock_model.call_count == 2

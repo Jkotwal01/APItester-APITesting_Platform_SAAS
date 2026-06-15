@@ -1,4 +1,5 @@
 import pytest
+
 from aitester.core.exceptions import SpecParseError, SpecValidationError
 from aitester.parser.openapi import OpenAPIParser
 
@@ -65,9 +66,9 @@ def test_parser_extracts_endpoints():
     parser = OpenAPIParser(SAMPLE_SPEC)
     spec = parser.parse()
     endpoints = spec.endpoints
-    
+
     assert len(endpoints) == 3
-    
+
     get_users = next(e for e in endpoints if e.path == "/users" and e.method == "GET")
     assert get_users.operation_id == "getUsers"
     assert len(get_users.parameters) == 1

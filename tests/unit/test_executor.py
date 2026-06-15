@@ -59,13 +59,12 @@ async def test_runner_executes_batch(sample_test_cases):
     )
 
     async def mock_request(method, url, **kwargs):
-        if url == "http://test-api.local/users":
-            return mock_response_200
-        elif url == "http://test-api.local/login":
-            return mock_response_500
-        elif url == "http://test-api.local/items":
-            return mock_response_422
-        return httpx.Response(404, request=httpx.Request(method, url))
+        responses = {
+            "http://test-api.local/users": mock_response_200,
+            "http://test-api.local/login": mock_response_500,
+            "http://test-api.local/items": mock_response_422,
+        }
+        return responses.get(url, httpx.Response(404, request=httpx.Request(method, url)))
 
     with patch("httpx.AsyncClient.request", new_callable=AsyncMock) as mock_req:
         mock_req.side_effect = mock_request
@@ -103,4 +102,5 @@ async def test_runner_handles_connection_error():
         assert len(results) == 1
         assert results[0].passed is False
         assert results[0].actual_status_code == 0
+        assert results[0].actual_body is not None
         assert "Failed to connect" in results[0].actual_body

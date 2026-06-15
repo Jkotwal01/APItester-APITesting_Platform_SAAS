@@ -1,4 +1,5 @@
 import json
+
 import pytest
 
 from aitester.ai.validators import (

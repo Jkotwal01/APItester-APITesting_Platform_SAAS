@@ -1,8 +1,8 @@
 import pytest
-from httpx import AsyncClient, ASGITransport
+from httpx import ASGITransport, AsyncClient
+
 from aitester.api.main import app
-from aitester.db.models.project import Project
-from aitester.db.session import AsyncSessionLocal
+
 
 @pytest.fixture
 async def client():
@@ -61,12 +61,12 @@ class TestAPIHardening:
             json={"name": "Results Test", "base_url": "http://test.com"})
         assert proj.status_code in [200, 201]
         project_id = proj.json()["id"]
-        
+
         run = await client.post(f"/api/v1/projects/{project_id}/runs",
             json={"base_url": "http://test.com", "spec_path": "tests/fixtures/simple_api.yaml", "types": ["functional"], "enable_ai": False})
         assert run.status_code in [200, 202]
         run_id = run.json()["id"]
-        
+
         # Get results
         resp = await client.get(f"/api/v1/runs/{run_id}/results")
         assert resp.status_code == 200
@@ -81,10 +81,10 @@ class TestAPIHardening:
             if proj.status_code in [200, 201]:
                 break
             await asyncio.sleep(0.5)
-        
+
         assert proj.status_code in [200, 201], f"Failed to create project: {proj.text}"
         project_id = proj.json()["id"]
-        
+
         # Get runs
         resp = await client.get(f"/api/v1/projects/{project_id}/runs")
         assert resp.status_code == 200

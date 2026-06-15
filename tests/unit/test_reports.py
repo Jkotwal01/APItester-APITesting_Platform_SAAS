@@ -1,17 +1,20 @@
-import pytest
 import json
-from datetime import datetime, timezone
-from aitester.reports.metrics import calculate_metrics
-from aitester.reports.json_generator import generate_json_report
+from datetime import UTC, datetime
+
+import pytest
+
 from aitester.reports.html_generator import generate_html_report
+from aitester.reports.json_generator import generate_json_report
+from aitester.reports.metrics import calculate_metrics
+
 
 @pytest.fixture
 def sample_run_data():
     return {
         "project_name": "Test API",
         "run_id": "test-run-123",
-        "started_at": datetime.now(timezone.utc).isoformat(),
-        "completed_at": datetime.now(timezone.utc).isoformat(),
+        "started_at": datetime.now(UTC).isoformat(),
+        "completed_at": datetime.now(UTC).isoformat(),
         "duration_ms": 5000,
         "results": [
             {"test_case_name": "T1", "category": "functional", "status": "passed",

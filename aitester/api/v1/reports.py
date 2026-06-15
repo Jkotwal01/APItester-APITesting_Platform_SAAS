@@ -4,8 +4,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy.orm import selectinload
 
-from aitester.db.session import get_db
 from aitester.db.models.test_run import TestRun
+from aitester.db.session import get_db
 from aitester.reports.html_generator import generate_html_report
 from aitester.reports.json_generator import generate_json_report
 
@@ -13,15 +13,15 @@ router = APIRouter(prefix="/runs/{run_id}/report", tags=["Reports"])
 
 async def _get_run_data(run_id: str, db: AsyncSession) -> dict:
     stmt = select(TestRun).options(
-        selectinload(TestRun.test_cases).selectinload("test_results")
+        selectinload(TestRun.test_cases).selectinload(TestRun.test_cases.property.mapper.class_.test_results)
     ).filter(TestRun.id == run_id)
-    
+
     result = await db.execute(stmt)
     test_run = result.scalar_one_or_none()
-    
+
     if not test_run:
         raise HTTPException(status_code=404, detail=f"Test run {run_id} not found")
-        
+
     results_data = []
     for tc in test_run.test_cases:
         for tr in tc.test_results:
@@ -34,7 +34,7 @@ async def _get_run_data(run_id: str, db: AsyncSession) -> dict:
                 "actual_status_code": tr.actual_status_code,
                 "response_time_ms": tr.response_time_ms,
             })
-            
+
     return {
         "project_name": "API Project",
         "run_id": str(test_run.id),

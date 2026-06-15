@@ -1,15 +1,15 @@
 import asyncio
 import uuid
+
 import typer
 from rich.console import Console
-from rich.progress import track
 
-from aitester.parser.parser import parse_spec
-from aitester.generators.coordinator import TestGenerationCoordinator
-from aitester.executor.runner import AsyncTestRunner
-from aitester.db.session import AsyncSessionLocal
 from aitester.db.models.project import Project
 from aitester.db.models.test_run import TestRun
+from aitester.db.session import AsyncSessionLocal
+from aitester.executor.runner import AsyncTestRunner
+from aitester.generators.coordinator import TestGenerationCoordinator
+from aitester.parser.parser import parse_spec
 
 console = Console()
 
@@ -27,7 +27,7 @@ async def execute_pipeline(spec_path: str, base_url: str, enable_ai: bool):
             # Create a dummy run ID for CLI (or save to DB)
             test_run_id = str(uuid.uuid4())
             test_cases = await coordinator.generate_async(spec, test_run_id)
-        
+
         console.print(f"[green][OK][/green] Generated {len(test_cases)} test cases.")
 
         if not test_cases:
@@ -37,20 +37,20 @@ async def execute_pipeline(spec_path: str, base_url: str, enable_ai: bool):
         # Execute Tests
         console.print("[bold blue]Executing tests against target API...[/bold blue]")
         runner = AsyncTestRunner(base_url=base_url)
-        
+
         # We don't use track for the async execution because it runs concurrently.
         # We just await it.
         with console.status("[bold blue]Running tests concurrently..."):
             results = await runner.execute_all(test_cases)
-            
+
         passed = sum(1 for r in results if r.passed)
         failed = len(results) - passed
-        
+
         console.print("\n[bold]Execution Summary[/bold]")
         console.print(f"Total: {len(results)}")
         console.print(f"Passed: [green]{passed}[/green]")
         console.print(f"Failed: [red]{failed}[/red]")
-        
+
         # Save to DB
         with console.status("[bold blue]Saving results to database..."):
             async with AsyncSessionLocal() as db:
@@ -58,7 +58,7 @@ async def execute_pipeline(spec_path: str, base_url: str, enable_ai: bool):
                 db.add(project)
                 await db.commit()
                 await db.refresh(project)
-                
+
                 run = TestRun(
                     id=uuid.UUID(test_run_id),
                     project_id=project.id,
@@ -69,7 +69,7 @@ async def execute_pipeline(spec_path: str, base_url: str, enable_ai: bool):
                 db.add_all(test_cases)
                 db.add_all(results)
                 await db.commit()
-                
+
         console.print(f"[green][OK][/green] Results saved! Project ID: {project.id}")
 
     except Exception as e:

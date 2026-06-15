@@ -15,7 +15,6 @@ import asyncio
 
 import pytest
 
-
 # ─────────────────────────────────────────────────────────────────────────────
 # PostgreSQL Connectivity Tests
 # ─────────────────────────────────────────────────────────────────────────────
@@ -280,7 +279,7 @@ class TestRedisConnectivity:
         await asyncio.gather(*[set_key(k, i) for i, k in enumerate(keys)])
 
         results = []
-        for i, k in enumerate(keys):
+        for _, k in enumerate(keys):
             val = await redis_client.get(k)
             results.append(json.loads(val))  # type: ignore[arg-type]
             await redis_client.delete(k)

@@ -1,21 +1,18 @@
-import uuid
 import logging
-from typing import Any
+import uuid
 
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException
-from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from aitester.api.dependencies import get_db
 from aitester.api.schemas.test_run import TestRunCreate, TestRunResponse, TestRunStatusResponse
 from aitester.db.models.project import Project
-from aitester.db.models.test_run import TestRun
-from aitester.db.models.test_case import TestCase
 from aitester.db.models.test_result import TestResult
-from aitester.parser.parser import parse_spec
-from aitester.generators.coordinator import TestGenerationCoordinator
+from aitester.db.models.test_run import TestRun
 from aitester.executor.runner import AsyncTestRunner
-from aitester.core.config import settings
+from aitester.generators.coordinator import TestGenerationCoordinator
+from aitester.parser.parser import parse_spec
 
 router = APIRouter()
 logger = logging.getLogger("aitester.api")
@@ -38,11 +35,11 @@ async def execute_test_run(
     try:
         # Parse spec
         spec = parse_spec(spec_path)
-        
+
         # Generate test cases
         coordinator = TestGenerationCoordinator(enable_ai=enable_ai, types=types)
         test_cases = await coordinator.generate_async(spec, str(test_run_id))
-        
+
         if not test_cases:
             async with AsyncSessionLocal() as db:
                 run = await db.get(TestRun, test_run_id)
@@ -50,27 +47,27 @@ async def execute_test_run(
                     run.status = "COMPLETED"
                     await db.commit()
             return
-            
+
         async with AsyncSessionLocal() as db:
             run = await db.get(TestRun, test_run_id)
             if run:
                 run.status = "RUNNING"
                 db.add_all(test_cases)
                 await db.commit()
-            
+
             # Reattach to session for relationships if needed, but we can just use the objects
-        
+
         # Execute test cases
         runner = AsyncTestRunner(base_url=base_url)
         results = await runner.execute_all(test_cases)
-        
+
         async with AsyncSessionLocal() as db:
             run = await db.get(TestRun, test_run_id)
             if run:
                 db.add_all(results)
                 run.status = "COMPLETED"
                 await db.commit()
-                
+
     except Exception as e:
         logger.error(f"Test run {test_run_id} failed: {e}", exc_info=True)
         async with AsyncSessionLocal() as db:
@@ -106,7 +103,7 @@ async def create_test_run(
         project_id=project_id,
         base_url=run_create.base_url,
         spec_path=run_create.spec_path,
-        types=run_create.types,
+        types=list(run_create.types),
         enable_ai=run_create.enable_ai,
     )
 
@@ -126,10 +123,10 @@ async def get_test_run_status(run_id: uuid.UUID, db: AsyncSession = Depends(get_
     run = await db.get(TestRun, run_id)
     if not run:
         raise HTTPException(status_code=404, detail="Test run not found")
-        
+
     result = await db.execute(select(TestResult).where(TestResult.test_run_id == run_id))
     results = result.scalars().all()
-    
+
     return TestRunStatusResponse(
         status=run.status,
         completed_cases=len(results),
@@ -142,10 +139,10 @@ async def get_test_run_results(run_id: uuid.UUID, db: AsyncSession = Depends(get
     run = await db.get(TestRun, run_id)
     if not run:
         raise HTTPException(status_code=404, detail="Test run not found")
-        
+
     result = await db.execute(select(TestResult).where(TestResult.test_run_id == run_id))
     results = result.scalars().all()
-    
+
     # Normally we'd return a Pydantic model list, but dicts work for simplicity
     return [{"id": str(r.id), "test_case_id": str(r.test_case_id), "status": "passed" if r.passed else "failed", "response_time_ms": r.latency_ms, "actual_status_code": r.actual_status_code} for r in results]
 
@@ -155,7 +152,7 @@ async def list_test_runs(project_id: uuid.UUID, db: AsyncSession = Depends(get_d
     project = await db.get(Project, project_id)
     if not project:
         raise HTTPException(status_code=404, detail="Project not found")
-        
+
     result = await db.execute(select(TestRun).where(TestRun.project_id == project_id))
     runs = result.scalars().all()
     return runs
@@ -166,7 +163,7 @@ async def delete_test_run(run_id: uuid.UUID, db: AsyncSession = Depends(get_db))
     run = await db.get(TestRun, run_id)
     if not run:
         raise HTTPException(status_code=404, detail="Test run not found")
-        
+
     await db.delete(run)
     await db.commit()
     return None

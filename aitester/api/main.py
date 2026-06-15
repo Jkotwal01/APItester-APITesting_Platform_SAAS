@@ -1,18 +1,18 @@
 import logging
 
-from fastapi import FastAPI, Request, status, Depends
-from fastapi.responses import JSONResponse
+from fastapi import Depends, FastAPI, Request, status
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 
+from aitester.api.middleware import RequestTimingMiddleware
 from aitester.api.routes import projects, test_runs
 from aitester.api.v1 import reports
-from aitester.api.middleware import RequestTimingMiddleware
-from aitester.core.security import verify_api_key
 from aitester.core.config import settings
 from aitester.core.exceptions import (
     AITesterError,
     RecordNotFoundError,
 )
+from aitester.core.security import verify_api_key
 
 logger = logging.getLogger("aitester.api")
 

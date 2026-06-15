@@ -52,7 +52,7 @@ class SecurityDetector:
         # If the exact payload is reflected back without sanitization
         # We'd need to know the specific payload used.
         # We can extract it from the test case body or query params.
-        payloads_used = []
+        payloads_used: list[str] = []
         if test_case.query_params:
             payloads_used.extend(str(v) for v in test_case.query_params.values())
         if test_case.body:

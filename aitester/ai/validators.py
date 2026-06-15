@@ -1,8 +1,10 @@
 import json
 from typing import Any, Literal
+
 from pydantic import BaseModel, Field, ValidationError
 
 from aitester.core.exceptions import AIOutputValidationError
+
 
 class AITestCase(BaseModel):
     name: str = Field(..., description="Short name of the test case")
@@ -55,34 +57,34 @@ def validate_business_logic_output(raw_json: str) -> list[AITestCase]:
     try:
         data = json.loads(raw_json)
     except json.JSONDecodeError as e:
-        raise AIOutputValidationError(f"Invalid JSON returned by AI: {e}")
+        raise AIOutputValidationError(f"Invalid JSON returned by AI: {e}") from e
 
     try:
         output = BusinessLogicOutput.model_validate(data)
         return output.test_cases
     except ValidationError as e:
-        raise AIOutputValidationError(f"AI Output does not match required schema: {e}")
+        raise AIOutputValidationError(f"AI Output does not match required schema: {e}") from e
 
 def validate_failure_analysis_output(raw_json: str) -> dict[str, Any]:
     raw_json = _extract_json_string(raw_json)
     try:
         data = json.loads(raw_json)
     except json.JSONDecodeError as e:
-        raise AIOutputValidationError(f"Invalid JSON returned by AI: {e}")
+        raise AIOutputValidationError(f"Invalid JSON returned by AI: {e}") from e
     try:
         output = FailureAnalysisOutput.model_validate(data)
         return output.model_dump()
     except ValidationError as e:
-        raise AIOutputValidationError(f"Failure Analysis Output does not match required schema: {e}")
+        raise AIOutputValidationError(f"Failure Analysis Output does not match required schema: {e}") from e
 
 def validate_risk_assessment_output(raw_json: str) -> dict[str, Any]:
     raw_json = _extract_json_string(raw_json)
     try:
         data = json.loads(raw_json)
     except json.JSONDecodeError as e:
-        raise AIOutputValidationError(f"Invalid JSON returned by AI: {e}")
+        raise AIOutputValidationError(f"Invalid JSON returned by AI: {e}") from e
     try:
         output = RiskAssessmentOutput.model_validate(data)
         return output.model_dump()
     except ValidationError as e:
-        raise AIOutputValidationError(f"Risk Assessment Output does not match required schema: {e}")
+        raise AIOutputValidationError(f"Risk Assessment Output does not match required schema: {e}") from e

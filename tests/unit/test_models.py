@@ -6,12 +6,12 @@ Verifies table creation and SQLAlchemy relationships.
 
 import pytest
 
+
 # Fixture to provide an async session for these tests
 @pytest.fixture
 async def db_session():
-    from aitester.db.session import AsyncSessionLocal
     from aitester.db.base import Base
-    from aitester.db.session import engine
+    from aitester.db.session import AsyncSessionLocal, engine
 
     # Note: tests in this suite run against the real dev database
     # (aitester) which is fine for local dev gate checks.
@@ -20,7 +20,7 @@ async def db_session():
         # For tests, we don't drop tables, we rely on rollbacks
         # but just to ensure tables exist:
         await conn.run_sync(Base.metadata.create_all)
-        
+
     async with AsyncSessionLocal() as session:
         yield session
         await session.rollback()

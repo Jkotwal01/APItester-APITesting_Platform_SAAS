@@ -1,4 +1,9 @@
-from aitester.parser.models import ParsedEndpoint, ParsedParameter, ParsedRequestBody, ParsedResponse
+from aitester.parser.models import (
+    ParsedEndpoint,
+    ParsedParameter,
+    ParsedRequestBody,
+    ParsedResponse,
+)
 from aitester.parser.openapi import OpenAPIParser
 
 __all__ = [

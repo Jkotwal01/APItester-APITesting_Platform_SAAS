@@ -1,7 +1,8 @@
 import uuid
+from datetime import datetime
 from typing import TYPE_CHECKING
 
-from sqlalchemy import ForeignKey, String
+from sqlalchemy import DateTime, ForeignKey, String
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -23,6 +24,8 @@ class TestRun(TimestampMixin, Base):
     )
     status: Mapped[str] = mapped_column(String(50), default="PENDING", nullable=False)
     base_url: Mapped[str] = mapped_column(String(2048), nullable=False)
+    started_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
     project: Mapped["Project"] = relationship("Project", back_populates="test_runs")
     test_cases: Mapped[list["TestCase"]] = relationship(

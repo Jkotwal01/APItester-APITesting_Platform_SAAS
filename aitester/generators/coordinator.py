@@ -1,12 +1,12 @@
 import asyncio
-from typing import Any
 
-from aitester.db.models.test_case import TestCase
-from aitester.parser.models import ParsedSpec
-from aitester.generators.functional import FunctionalGenerator
-from aitester.generators.edge import EdgeCaseGenerator
-from aitester.security.generator import SecurityGenerator
 from aitester.ai.business_logic import BusinessLogicGenerator
+from aitester.db.models.test_case import TestCase
+from aitester.generators.base import BaseGenerator
+from aitester.generators.edge import EdgeCaseGenerator
+from aitester.generators.functional import FunctionalGenerator
+from aitester.parser.models import ParsedSpec
+from aitester.security.generator import SecurityGenerator
 
 
 class TestGenerationCoordinator:
@@ -28,7 +28,7 @@ class TestGenerationCoordinator:
         for endpoint in spec.endpoints:
             # Functional Tests
             if "functional" in self.types:
-                gen = FunctionalGenerator(endpoint, test_run_id)
+                gen: BaseGenerator = FunctionalGenerator(endpoint, test_run_id)
                 all_tests.extend(gen.generate())
 
             # Edge Case Tests
@@ -43,9 +43,9 @@ class TestGenerationCoordinator:
 
             # AI Logic Tests
             if self.enable_ai and "ai" in self.types:
-                gen = BusinessLogicGenerator(endpoint, test_run_id)
+                ai_gen = BusinessLogicGenerator(endpoint, test_run_id)
                 # We append the coroutine to a list to run them concurrently
-                ai_tasks.append(gen.generate_async())
+                ai_tasks.append(ai_gen.generate_async())
 
         # Gather all AI generation tasks concurrently if any
         if ai_tasks:

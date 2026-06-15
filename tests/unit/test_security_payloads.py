@@ -40,24 +40,24 @@ def test_security_generator(sample_endpoint):
     # Query param 'q' gets: SQLI, XSS, Path traversal, Command injection
     # Body field 'username' gets: SQLI, XSS, Path traversal, Command injection
     # Plus JWT payloads as headers
-    
+
     expected_sqli = len(SQLI_PAYLOADS) * 2  # Once for query, once for body
     expected_xss = len(XSS_PAYLOADS) * 2
     expected_path = len(PATH_TRAVERSAL_PAYLOADS) * 2
     expected_cmd = len(COMMAND_INJECTION_PAYLOADS) * 2
     expected_jwt = len(JWT_PAYLOADS)
-    
+
     total_expected = expected_sqli + expected_xss + expected_path + expected_cmd + expected_jwt
-    
+
     assert len(test_cases) == total_expected
-    
+
     sqli_cases = [tc for tc in test_cases if tc.category == "SECURITY_SQLI"]
     assert len(sqli_cases) == expected_sqli
 
 
 def test_security_detector_sqli():
     tc = TestCase(category="SECURITY_SQLI")
-    
+
     # Positive detection
     assert SecurityDetector.is_vulnerable(tc, 200, "you have an error in your sql syntax", {}) is True
     # 500 error assumes vulnerable crash
@@ -68,7 +68,7 @@ def test_security_detector_sqli():
 
 def test_security_detector_xss():
     tc = TestCase(category="SECURITY_XSS", query_params={"q": "<script>alert(1)</script>"})
-    
+
     # Reflected XSS
     assert SecurityDetector.is_vulnerable(tc, 200, "<html>Hello <script>alert(1)</script></html>", {}) is True
     # Sanitized

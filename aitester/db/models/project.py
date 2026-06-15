@@ -2,7 +2,7 @@ import uuid
 from typing import TYPE_CHECKING, Any
 
 from sqlalchemy import String
-from sqlalchemy.dialects.postgresql import UUID, JSONB
+from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from aitester.db.base import Base, TimestampMixin

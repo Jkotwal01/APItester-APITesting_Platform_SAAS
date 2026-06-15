@@ -1,5 +1,6 @@
 import pytest
-from aitester.security.scorer import calculate_security_score, SecurityFinding, score_to_risk_level
+
+from aitester.security.scorer import SecurityFinding, calculate_security_score, score_to_risk_level
 
 
 class TestSecurityScorer:
@@ -59,18 +60,18 @@ class TestEndToEndSecurity:
     async def test_security_tests_detect_vuln_in_vulnerable_mock(self):
         """Test that the detector picks up SQLi in a deliberately vulnerable response."""
         from unittest.mock import MagicMock
-        
+
         # We need a detect_sqli stub if it's not implemented yet
         # Wait, Stage 09 built `aitester/security/detector.py`, let's import it
         try:
             from aitester.security.detector import SQLiDetector
-            
+
             # Simulate a vulnerable API response
             resp = MagicMock()
             resp.text = "MySQL Error: You have an error in your SQL syntax near 'OR'"
             resp.status_code = 500
             resp.headers = {"content-type": "application/json"}
-    
+
             # Use the actual class method we built in Stage 09
             detector = SQLiDetector()
             finding = detector.detect(resp)

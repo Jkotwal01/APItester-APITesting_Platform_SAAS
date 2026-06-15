@@ -1,8 +1,8 @@
 import uuid
 from typing import TYPE_CHECKING, Any
 
-from sqlalchemy import Boolean, Float, ForeignKey, Text
-from sqlalchemy.dialects.postgresql import UUID, JSONB
+from sqlalchemy import Boolean, Float, ForeignKey, String, Text
+from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from aitester.db.base import Base, TimestampMixin
@@ -24,11 +24,13 @@ class TestResult(TimestampMixin, Base):
     )
 
     passed: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    status: Mapped[str] = mapped_column(String(20), nullable=False, default="passed")
 
     # Actual Response Data
     actual_status_code: Mapped[int | None] = mapped_column(nullable=True)
     actual_body: Mapped[str | None] = mapped_column(Text, nullable=True)
     latency_ms: Mapped[float] = mapped_column(Float, default=0.0)
+    response_time_ms: Mapped[float] = mapped_column(Float, default=0.0)
 
     # AI Failure Analysis
     ai_failure_analysis: Mapped[dict[str, Any] | None] = mapped_column(

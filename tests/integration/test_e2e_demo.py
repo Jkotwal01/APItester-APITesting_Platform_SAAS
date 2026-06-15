@@ -1,8 +1,9 @@
-import os
 import uuid
+from unittest.mock import AsyncMock, patch
+
 import pytest
-from unittest.mock import patch, AsyncMock
 from typer.testing import CliRunner
+
 from aitester.cli.app import app
 
 runner = CliRunner()
@@ -42,18 +43,18 @@ def test_e2e_demo_flow(temp_spec_file):
         mock_req.return_value.status_code = 200
         mock_req.return_value.elapsed.total_seconds = lambda: 0.1
         mock_req.return_value.text = '{"status": "ok"}'
-        
+
         with patch("aitester.cli.commands.run.AsyncSessionLocal") as mock_session_maker:
             mock_session = AsyncMock()
             mock_session_maker.return_value.__aenter__.return_value = mock_session
-            
+
             mock_project = AsyncMock()
             mock_project.id = uuid.uuid4()
             mock_session.commit = AsyncMock()
             mock_session.refresh = AsyncMock()
-            
+
             result_run = runner.invoke(app, ["run", "--spec", temp_spec_file, "--base-url", "http://localhost:8000"])
-            
+
             assert result_run.exit_code == 0
             assert "Execution Summary" in result_run.stdout
 

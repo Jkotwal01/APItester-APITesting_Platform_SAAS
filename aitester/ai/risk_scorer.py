@@ -30,7 +30,7 @@ class RiskScorer:
         )
 
         try:
-            assessment = await self.ai_client.generate_with_retry(prompt, validate_risk_assessment_output)
+            assessment: dict[str, Any] = await self.ai_client.generate_with_retry(prompt, validate_risk_assessment_output)
             return assessment
         except Exception as e:
             logger.error(f"Risk assessment failed: {e}")

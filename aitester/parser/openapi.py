@@ -1,4 +1,3 @@
-from aitester.parser.models import ParsedSpec
 import logging
 from typing import Any
 
@@ -8,6 +7,7 @@ from aitester.parser.models import (
     ParsedParameter,
     ParsedRequestBody,
     ParsedResponse,
+    ParsedSpec,
 )
 
 logger = logging.getLogger("aitester.parser")
@@ -37,18 +37,18 @@ class OpenAPIParser:
         """
         Parses the entire specification and returns a ParsedSpec object.
         """
-        
+
         endpoints = []
         paths = self.spec.get("paths", {})
-        
+
         info = self.spec.get("info", {})
         title = info.get("title", "Unknown API")
         version = info.get("version", "1.0.0")
-        
+
         for path, path_item in paths.items():
             if not isinstance(path_item, dict):
                 continue
-                
+
             # Parse path-level parameters
             path_parameters = self._parse_parameters(path_item.get("parameters", []))
 
@@ -56,12 +56,12 @@ class OpenAPIParser:
                 method_lower = method.lower()
                 if method_lower not in self.SUPPORTED_METHODS:
                     continue
-                    
+
                 if not isinstance(operation, dict):
                     continue
 
                 operation_parameters = self._parse_parameters(operation.get("parameters", []))
-                
+
                 # Combine path-level and operation-level parameters
                 # Operation-level parameters override path-level parameters with the same name and in
                 merged_params = self._merge_parameters(path_parameters, operation_parameters)
@@ -95,12 +95,12 @@ class OpenAPIParser:
                 continue
 
             parsed.append(
-                ParsedParameter(
-                    name=param.get("name", ""),
-                    in_=param.get("in", "query"),
-                    required=param.get("required", False),
-                    schema=param.get("schema"),
-                )
+                ParsedParameter.model_validate({
+                    "name": param.get("name", ""),
+                    "in": param.get("in", "query"),
+                    "required": param.get("required", False),
+                    "schema": param.get("schema"),
+                })
             )
         return parsed
 
@@ -117,11 +117,11 @@ class OpenAPIParser:
     def _parse_request_body(self, request_body: dict[str, Any] | None) -> ParsedRequestBody | None:
         if not request_body or "$ref" in request_body:
             return None
-            
+
         content = request_body.get("content", {})
         if not content:
             return None
-            
+
         # We prefer application/json
         if "application/json" in content:
             schema = content["application/json"].get("schema")
@@ -131,7 +131,7 @@ class OpenAPIParser:
                     schema=schema,
                     required=request_body.get("required", False),
                 )
-        
+
         # Fallback to the first available content type
         for content_type, details in content.items():
             schema = details.get("schema")
@@ -141,7 +141,7 @@ class OpenAPIParser:
                     schema=schema,
                     required=request_body.get("required", False),
                 )
-                
+
         return None
 
     def _parse_responses(self, responses_dict: dict[str, Any]) -> list[ParsedResponse]:
@@ -149,7 +149,7 @@ class OpenAPIParser:
         for status_code, details in responses_dict.items():
             if "$ref" in details:
                 continue
-            
+
             content = details.get("content")
             parsed.append(
                 ParsedResponse(

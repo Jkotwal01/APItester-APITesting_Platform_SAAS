@@ -43,7 +43,8 @@ class GeminiClient:
                 raise AIEngineError("AI returned an empty response.")
 
             # Parse the JSON response
-            return json.loads(content)
+            result: dict[str, Any] = json.loads(content)
+            return result
 
         except ResourceExhausted as e:
             logger.error("Gemini API rate limit exceeded.")
@@ -64,8 +65,8 @@ class GeminiClient:
         Retries up to max_retries times if the validation fails.
         """
         from aitester.core.exceptions import AIOutputValidationError
-        
-        last_error = None
+
+        last_error: Exception | None = None
         for attempt in range(max_retries):
             try:
                 # Use JSON mode if supported, or just prompt for JSON
@@ -77,9 +78,10 @@ class GeminiClient:
                 content = response.text
                 if not content:
                     raise AIOutputValidationError("AI returned an empty response.")
-                    
-                return validator(content)
-                
+
+                validated: Any = validator(content)
+                return validated
+
             except ResourceExhausted as e:
                 logger.error("Gemini API rate limit exceeded.")
                 raise AIRateLimitError("Gemini API rate limit exceeded.") from e
@@ -93,5 +95,5 @@ class GeminiClient:
             except Exception as e:
                 last_error = e
                 logger.warning(f"Unexpected AI error on attempt {attempt + 1}: {e}")
-                
+
         raise last_error or AIEngineError("Failed to generate valid AI output after max retries.")

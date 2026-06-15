@@ -5,7 +5,6 @@ from faker import Faker
 
 from aitester.db.models.test_case import TestCase
 from aitester.generators.base import BaseGenerator
-from aitester.parser.models import ParsedEndpoint
 
 fake = Faker()
 
@@ -21,7 +20,7 @@ class FunctionalGenerator(BaseGenerator):
         # Find the primary success response (e.g., 200 or 201)
         success_response = self._get_success_response()
         expected_status = int(success_response.status_code) if success_response else 200
-        
+
         # If there's a response schema defined, we'll expect it
         expected_schema = None
         if success_response and success_response.content:
@@ -31,11 +30,11 @@ class FunctionalGenerator(BaseGenerator):
 
         # Generate fake query parameters
         query_params = self._generate_parameters_by_in("query")
-        
+
         # Note: path parameters are technically part of the endpoint URL path in the DB model.
         # We replace {param} with fake data directly in the URL path for simplicity in this MVP,
-        # or we could store them in query_params. For now, let's keep the raw endpoint string 
-        # and replace them at execution time, or replace them now. Let's replace them now to 
+        # or we could store them in query_params. For now, let's keep the raw endpoint string
+        # and replace them at execution time, or replace them now. Let's replace them now to
         # make execution simpler.
         endpoint_path = self.endpoint.path
         path_params = self._generate_parameters_by_in("path")
@@ -44,7 +43,7 @@ class FunctionalGenerator(BaseGenerator):
 
         # Generate fake headers (if explicitly required by the API)
         headers = self._generate_parameters_by_in("header")
-        
+
         # Generate fake request body
         body = None
         if self.endpoint.request_body and self.endpoint.request_body.schema_:
@@ -60,7 +59,7 @@ class FunctionalGenerator(BaseGenerator):
         )
         # Override the endpoint with the path-injected one
         tc.endpoint = endpoint_path
-        
+
         test_cases.append(tc)
         return test_cases
 

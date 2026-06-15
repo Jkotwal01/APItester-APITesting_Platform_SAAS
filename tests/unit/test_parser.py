@@ -63,7 +63,8 @@ def test_parser_invalid_spec():
 
 def test_parser_extracts_endpoints():
     parser = OpenAPIParser(SAMPLE_SPEC)
-    endpoints = parser.parse()
+    spec = parser.parse()
+    endpoints = spec.endpoints
     
     assert len(endpoints) == 3
     

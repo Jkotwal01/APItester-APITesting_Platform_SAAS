@@ -46,6 +46,7 @@ class Settings(BaseSettings):
     # ─── Security ─────────────────────────────────────────────────────────────
     SECRET_KEY: str = "changeme-generate-a-real-secret-key-at-least-32-chars"
     API_KEY_HEADER: str = "X-API-Key"
+    API_KEY: str = ""
 
     # ─── Validators ───────────────────────────────────────────────────────────
     @field_validator("LOG_LEVEL")

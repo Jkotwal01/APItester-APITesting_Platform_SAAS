@@ -135,3 +135,38 @@ async def get_test_run_status(run_id: uuid.UUID, db: AsyncSession = Depends(get_
         completed_cases=len(results),
         # total_cases might be hard to calculate without counting TestCases, so we'll leave it as None for now
     )
+
+
+@router.get("/runs/{run_id}/results")
+async def get_test_run_results(run_id: uuid.UUID, db: AsyncSession = Depends(get_db)):
+    run = await db.get(TestRun, run_id)
+    if not run:
+        raise HTTPException(status_code=404, detail="Test run not found")
+        
+    result = await db.execute(select(TestResult).where(TestResult.test_run_id == run_id))
+    results = result.scalars().all()
+    
+    # Normally we'd return a Pydantic model list, but dicts work for simplicity
+    return [{"id": str(r.id), "test_case_id": str(r.test_case_id), "status": "passed" if r.passed else "failed", "response_time_ms": r.latency_ms, "actual_status_code": r.actual_status_code} for r in results]
+
+
+@router.get("/projects/{project_id}/runs", response_model=list[TestRunResponse])
+async def list_test_runs(project_id: uuid.UUID, db: AsyncSession = Depends(get_db)):
+    project = await db.get(Project, project_id)
+    if not project:
+        raise HTTPException(status_code=404, detail="Project not found")
+        
+    result = await db.execute(select(TestRun).where(TestRun.project_id == project_id))
+    runs = result.scalars().all()
+    return runs
+
+
+@router.delete("/runs/{run_id}", status_code=204)
+async def delete_test_run(run_id: uuid.UUID, db: AsyncSession = Depends(get_db)):
+    run = await db.get(TestRun, run_id)
+    if not run:
+        raise HTTPException(status_code=404, detail="Test run not found")
+        
+    await db.delete(run)
+    await db.commit()
+    return None

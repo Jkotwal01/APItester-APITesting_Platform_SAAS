@@ -13,14 +13,26 @@ from aitester.db.session import AsyncSessionLocal, engine
 
 @pytest.fixture
 async def db_session():
-    """Provides a fresh database session for a test."""
-    async with engine.begin() as conn:
+    """Provides a fresh database session for a test using NullPool to avoid event-loop issues."""
+    from sqlalchemy.pool import NullPool
+
+    from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
+
+    from aitester.core.config import settings
+
+    # NullPool: no connection reuse between tests — avoids "Future attached to a different loop"
+    test_engine = create_async_engine(settings.DATABASE_URL, poolclass=NullPool)
+
+    async with test_engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
 
-    async with AsyncSessionLocal() as session:
+    TestSession = async_sessionmaker(bind=test_engine, class_=AsyncSessionLocal.__class__, expire_on_commit=False)
+
+    async with TestSession() as session:
         yield session
         await session.rollback()
-    await engine.dispose()
+
+    await test_engine.dispose()
 
 
 @pytest.fixture

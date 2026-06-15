@@ -16,7 +16,7 @@ async def db_session():
     """Provides a fresh database session for a test using NullPool to avoid event-loop issues."""
     from sqlalchemy.pool import NullPool
 
-    from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
+    from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
     from aitester.core.config import settings
 
@@ -26,7 +26,7 @@ async def db_session():
     async with test_engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
 
-    TestSession = async_sessionmaker(bind=test_engine, class_=AsyncSessionLocal.__class__, expire_on_commit=False)
+    TestSession = async_sessionmaker(bind=test_engine, class_=AsyncSession, expire_on_commit=False)
 
     async with TestSession() as session:
         yield session

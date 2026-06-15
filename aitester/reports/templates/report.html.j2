@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AITester Report — {{ project_name }}</title>
+  <meta name="description" content="AI-powered API test report for {{ project_name }} — Run {{ run_id }}" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg:       #0a0e1a;
+      --surface:  #111827;
+      --card:     #1a2235;
+      --border:   rgba(255,255,255,0.07);
+      --text:     #e2e8f0;
+      --muted:    #64748b;
+      --accent:   #6366f1;
+      --accent2:  #8b5cf6;
+      --green:    #10b981;
+      --red:      #ef4444;
+      --orange:   #f59e0b;
+      --blue:     #3b82f6;
+      --cyan:     #06b6d4;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      line-height: 1.6;
+    }
+
+    /* ─── HERO BANNER ─────────────────────────────────────────── */
+    .hero {
+      background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%);
+      border-bottom: 1px solid var(--border);
+      padding: 48px 40px 40px;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: -80px; left: -80px;
+      width: 400px; height: 400px;
+      background: radial-gradient(circle, rgba(99,102,241,0.15) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .hero::after {
+      content: '';
+      position: absolute;
+      bottom: -60px; right: 100px;
+      width: 300px; height: 300px;
+      background: radial-gradient(circle, rgba(139,92,246,0.12) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .hero-inner {
+      max-width: 1280px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+      flex-wrap: wrap;
+    }
+    .hero-logo {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .logo-icon {
+      width: 52px; height: 52px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 24px;
+      box-shadow: 0 8px 24px rgba(99,102,241,0.4);
+    }
+    .hero h1 {
+      font-size: 1.9rem;
+      font-weight: 800;
+      background: linear-gradient(90deg, #c7d2fe, #a5b4fc, #8b5cf6);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .hero-sub { color: var(--muted); font-size: 0.9rem; margin-top: 4px; }
+    .hero-badge {
+      background: rgba(16,185,129,0.15);
+      border: 1px solid rgba(16,185,129,0.3);
+      color: var(--green);
+      padding: 6px 16px;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+    }
+
+    /* ─── LAYOUT ──────────────────────────────────────────────── */
+    .container {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 40px 40px;
+    }
+
+    /* ─── META ROW ────────────────────────────────────────────── */
+    .meta-row {
+      display: flex;
+      gap: 24px;
+      flex-wrap: wrap;
+      margin-bottom: 36px;
+    }
+    .meta-pill {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 18px;
+      font-size: 0.82rem;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .meta-pill strong { color: var(--text); font-weight: 600; }
+
+    /* ─── METRIC CARDS ────────────────────────────────────────── */
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+      margin-bottom: 40px;
+    }
+    .metric-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .metric-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 40px rgba(0,0,0,0.4);
+    }
+    .metric-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      border-radius: 16px 16px 0 0;
+    }
+    .metric-card.total::before  { background: linear-gradient(90deg, var(--blue), var(--cyan)); }
+    .metric-card.passed::before { background: linear-gradient(90deg, var(--green), #34d399); }
+    .metric-card.failed::before { background: linear-gradient(90deg, var(--red), #f87171); }
+    .metric-card.security::before { background: linear-gradient(90deg, var(--orange), #fbbf24); }
+    .metric-card.time::before   { background: linear-gradient(90deg, var(--accent), var(--accent2)); }
+
+    .metric-label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 12px;
+    }
+    .metric-value {
+      font-size: 2.6rem;
+      font-weight: 800;
+      line-height: 1;
+      margin-bottom: 6px;
+    }
+    .metric-card.total  .metric-value { color: var(--blue); }
+    .metric-card.passed .metric-value { color: var(--green); }
+    .metric-card.failed .metric-value { color: var(--red); }
+    .metric-card.security .metric-value { color: var(--orange); }
+    .metric-card.time   .metric-value { color: var(--accent); }
+    .metric-sub { font-size: 0.8rem; color: var(--muted); }
+
+    /* ─── PROGRESS BAR ────────────────────────────────────────── */
+    .pass-rate-bar {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 40px;
+    }
+    .pass-rate-bar h2 { font-size: 1rem; font-weight: 600; margin-bottom: 16px; }
+    .bar-track {
+      height: 12px;
+      background: rgba(255,255,255,0.05);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+    .bar-fill {
+      height: 100%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, var(--green), #34d399);
+      transition: width 1s ease;
+    }
+    .bar-labels {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 10px;
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+    .bar-labels .pct { color: var(--green); font-weight: 700; font-size: 1rem; }
+
+    /* ─── AI SUMMARY ──────────────────────────────────────────── */
+    .ai-summary {
+      background: linear-gradient(135deg, rgba(99,102,241,0.08), rgba(139,92,246,0.06));
+      border: 1px solid rgba(99,102,241,0.25);
+      border-radius: 16px;
+      padding: 28px;
+      margin-bottom: 40px;
+    }
+    .ai-summary-header {
+      display: flex; align-items: center; gap: 12px;
+      margin-bottom: 12px;
+    }
+    .ai-chip {
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color: #fff;
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      padding: 3px 10px;
+      border-radius: 999px;
+    }
+    .ai-summary h2 { font-size: 1rem; font-weight: 600; }
+    .ai-summary p  { color: var(--muted); font-size: 0.9rem; line-height: 1.75; }
+
+    /* ─── SECTION HEADING ─────────────────────────────────────── */
+    .section-heading {
+      font-size: 1rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .section-heading::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    /* ─── RESULTS TABLE ───────────────────────────────────────── */
+    .table-wrap {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+      margin-bottom: 40px;
+    }
+    table { width: 100%; border-collapse: collapse; }
+    thead { background: rgba(255,255,255,0.03); }
+    th {
+      padding: 14px 20px;
+      text-align: left;
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      color: var(--muted);
+      border-bottom: 1px solid var(--border);
+    }
+    td {
+      padding: 14px 20px;
+      font-size: 0.875rem;
+      border-bottom: 1px solid var(--border);
+      vertical-align: middle;
+    }
+    tbody tr:last-child td { border-bottom: none; }
+    tbody tr { transition: background 0.15s; }
+    tbody tr:hover { background: rgba(255,255,255,0.03); }
+
+    /* status pill */
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 12px;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+    }
+    .status-pill.passed  { background: rgba(16,185,129,0.15); color: var(--green); border: 1px solid rgba(16,185,129,0.3); }
+    .status-pill.failed  { background: rgba(239,68,68,0.12);  color: var(--red);   border: 1px solid rgba(239,68,68,0.25); }
+    .status-pill.error   { background: rgba(245,158,11,0.12); color: var(--orange);border: 1px solid rgba(245,158,11,0.25); }
+    .dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+
+    /* category badge */
+    .cat-badge {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 6px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .cat-functional { background: rgba(59,130,246,0.12); color: #60a5fa; }
+    .cat-edge       { background: rgba(245,158,11,0.12); color: #fbbf24; }
+    .cat-security   { background: rgba(239,68,68,0.12);  color: #f87171; }
+    .cat-ai_logic   { background: rgba(139,92,246,0.12); color: #a78bfa; }
+    .cat-unknown    { background: rgba(255,255,255,0.07); color: var(--muted); }
+
+    /* method badge */
+    .method {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 5px;
+      background: rgba(99,102,241,0.12);
+      color: #a5b4fc;
+    }
+    .path { font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; color: var(--cyan); }
+    .time-val { font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; }
+
+    /* ─── CATEGORY BREAKDOWN ──────────────────────────────────── */
+    .breakdown-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+      margin-bottom: 40px;
+    }
+    .breakdown-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 20px;
+    }
+    .breakdown-title { font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.07em; color: var(--muted); margin-bottom: 12px; }
+    .breakdown-row { display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 6px; }
+    .breakdown-row span:last-child { font-weight: 600; }
+
+    /* ─── SECURITY ────────────────────────────────────────────── */
+    .security-empty {
+      background: var(--card);
+      border: 1px solid rgba(16,185,129,0.2);
+      border-radius: 14px;
+      padding: 32px;
+      text-align: center;
+      color: var(--green);
+      font-size: 0.9rem;
+      margin-bottom: 40px;
+    }
+    .security-empty .icon { font-size: 2.5rem; margin-bottom: 10px; }
+
+    /* ─── FOOTER ──────────────────────────────────────────────── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 24px 40px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.8rem;
+    }
+    footer strong { color: var(--accent); }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════ HERO ═══════════════════════════════════════ -->
+<div class="hero">
+  <div class="hero-inner">
+    <div class="hero-logo">
+      <div class="logo-icon">🧪</div>
+      <div>
+        <h1>AITester Report</h1>
+        <div class="hero-sub">{{ project_name }}</div>
+      </div>
+    </div>
+    <div class="hero-badge">
+      {% if metrics.pass_rate == 100 %}✅ All Tests Passed
+      {% elif metrics.pass_rate >= 80 %}⚠️ Mostly Passing
+      {% else %}❌ Needs Attention
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ BODY ═══════════════════════════════════════ -->
+<div class="container">
+
+  <!-- Meta row -->
+  <div class="meta-row">
+    <div class="meta-pill">🆔 Run ID: <strong>{{ run_id }}</strong></div>
+    {% if started_at %}<div class="meta-pill">📅 Date: <strong>{{ started_at }}</strong></div>{% endif %}
+    {% if duration_ms %}<div class="meta-pill">⏱ Duration: <strong>{{ duration_ms }}ms</strong></div>{% endif %}
+    <div class="meta-pill">📊 Total Tests: <strong>{{ metrics.total }}</strong></div>
+    <div class="meta-pill">🌐 Avg Latency: <strong>{{ "%.0f"|format(metrics.avg_response_time_ms) }}ms</strong></div>
+  </div>
+
+  <!-- Metric cards -->
+  <div class="metrics-grid">
+    <div class="metric-card total">
+      <div class="metric-label">Total Tests</div>
+      <div class="metric-value">{{ metrics.total }}</div>
+      <div class="metric-sub">cases executed</div>
+    </div>
+    <div class="metric-card passed">
+      <div class="metric-label">Passed</div>
+      <div class="metric-value">{{ metrics.passed }}</div>
+      <div class="metric-sub">{{ "%.1f"|format(metrics.pass_rate) }}% pass rate</div>
+    </div>
+    <div class="metric-card failed">
+      <div class="metric-label">Failed</div>
+      <div class="metric-value">{{ metrics.failed }}</div>
+      <div class="metric-sub">{{ metrics.error }} errors</div>
+    </div>
+    <div class="metric-card security">
+      <div class="metric-label">Security Score</div>
+      <div class="metric-value">{{ security_score }}<span style="font-size:1.2rem;font-weight:400">/100</span></div>
+      <div class="metric-sub">no critical findings</div>
+    </div>
+    <div class="metric-card time">
+      <div class="metric-label">Avg Response</div>
+      <div class="metric-value">{{ "%.0f"|format(metrics.avg_response_time_ms) }}<span style="font-size:1.2rem;font-weight:400">ms</span></div>
+      <div class="metric-sub">across all requests</div>
+    </div>
+  </div>
+
+  <!-- Pass rate progress bar -->
+  <div class="pass-rate-bar">
+    <h2>Overall Pass Rate</h2>
+    <div class="bar-track">
+      <div class="bar-fill" style="width: {{ metrics.pass_rate }}%"></div>
+    </div>
+    <div class="bar-labels">
+      <span>0%</span>
+      <span class="pct">{{ "%.1f"|format(metrics.pass_rate) }}%</span>
+      <span>100%</span>
+    </div>
+  </div>
+
+  <!-- AI Summary -->
+  {% if ai_executive_summary %}
+  <div class="ai-summary">
+    <div class="ai-summary-header">
+      <span class="ai-chip">AI INSIGHT</span>
+      <h2>Executive Summary</h2>
+    </div>
+    <p>{{ ai_executive_summary }}</p>
+  </div>
+  {% endif %}
+
+  <!-- Category breakdown -->
+  {% if metrics.by_category %}
+  <div class="section-heading">Category Breakdown</div>
+  <div class="breakdown-grid">
+    {% for cat, stats in metrics.by_category.items() %}
+    <div class="breakdown-card">
+      <div class="breakdown-title">{{ cat | replace('_', ' ') }}</div>
+      <div class="breakdown-row"><span>Total</span><span>{{ stats.total }}</span></div>
+      <div class="breakdown-row"><span style="color:var(--green)">Passed</span><span style="color:var(--green)">{{ stats.passed }}</span></div>
+      <div class="breakdown-row"><span style="color:var(--red)">Failed</span><span style="color:var(--red)">{{ stats.failed }}</span></div>
+      <div class="breakdown-row"><span style="color:var(--orange)">Error</span><span style="color:var(--orange)">{{ stats.error }}</span></div>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <!-- Results table -->
+  <div class="section-heading">Test Results</div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Status</th>
+          <th>Method</th>
+          <th>Path</th>
+          <th>Category</th>
+          <th>Test Name</th>
+          <th>HTTP</th>
+          <th>Time (ms)</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for result in results %}
+        <tr>
+          <td>
+            <span class="status-pill {{ result.status }}">
+              <span class="dot"></span>
+              {{ result.status | upper }}
+            </span>
+          </td>
+          <td><span class="method">{{ result.method }}</span></td>
+          <td class="path">{{ result.path }}</td>
+          <td><span class="cat-badge cat-{{ result.category | lower | replace(' ','_') }}">{{ result.category }}</span></td>
+          <td style="color:var(--muted); font-size:0.82rem">{{ result.test_case_name }}</td>
+          <td style="font-family:'JetBrains Mono',monospace; font-size:0.8rem; color:var(--muted)">
+            {% if result.actual_status_code %}{{ result.actual_status_code }}{% else %}—{% endif %}
+          </td>
+          <td class="time-val">
+            {% if result.response_time_ms %}
+              <span style="color:{% if result.response_time_ms < 500 %}var(--green){% elif result.response_time_ms < 2000 %}var(--orange){% else %}var(--red){% endif %}">
+                {{ "%.0f"|format(result.response_time_ms) }}
+              </span>
+            {% else %}—{% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Security findings -->
+  <div class="section-heading">Security Findings</div>
+  {% if security_findings %}
+  <div class="table-wrap" style="margin-bottom:40px">
+    <table>
+      <thead>
+        <tr>
+          <th>Severity</th>
+          <th>Type</th>
+          <th>Endpoint</th>
+          <th>CWE</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for finding in security_findings %}
+        <tr>
+          <td><span class="status-pill {{ 'failed' if finding.severity in ['critical','high'] else 'error' }}">{{ finding.severity | upper }}</span></td>
+          <td>{{ finding.type }}</td>
+          <td class="path">{{ finding.affected_endpoint }}</td>
+          <td style="font-family:'JetBrains Mono',monospace; font-size:0.8rem">{{ finding.cwe }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="security-empty">
+    <div class="icon">🛡️</div>
+    <strong>No security findings detected</strong><br/>
+    All endpoints passed security checks with a score of {{ security_score }}/100
+  </div>
+  {% endif %}
+
+</div><!-- /container -->
+
+<footer>
+  Generated by <strong>AITester</strong> — AI-Powered Universal API Testing Platform &nbsp;|&nbsp;
+  Report for run <code style="font-family:'JetBrains Mono',monospace">{{ run_id }}</code>
+</footer>
+
+</body>
+</html>

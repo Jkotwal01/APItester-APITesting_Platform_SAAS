@@ -37,7 +37,7 @@ htmlcov/
 coverage.xml
 
 # Reports (generated output)
-reports/
+/reports/
 *.html
 
 # Alembic

@@ -1,12 +1,14 @@
 import json
+
 from aitester.reports.metrics import calculate_metrics
+
 
 def generate_json_report(run_data: dict) -> str:
     """
     Generates a JSON string representing the test run report.
     """
     metrics = calculate_metrics(run_data.get("results", []))
-    
+
     report = {
         "meta": {
             "project_name": run_data.get("project_name", "Unknown Project"),
@@ -23,5 +25,5 @@ def generate_json_report(run_data: dict) -> str:
         "test_results": run_data.get("results", []),
         "security_findings": run_data.get("security_findings", []),
     }
-    
+
     return json.dumps(report, indent=2)

@@ -46,3 +46,10 @@ class ParsedEndpoint(BaseModel):
     @property
     def has_query_parameters(self) -> bool:
         return any(p.in_ == "query" for p in self.parameters)
+
+
+class ParsedSpec(BaseModel):
+    """Represents a fully parsed OpenAPI specification with metadata and endpoints."""
+    title: str = "Unknown API"
+    version: str = "1.0.0"
+    endpoints: list[ParsedEndpoint] = Field(default_factory=list)

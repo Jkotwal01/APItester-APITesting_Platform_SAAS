@@ -3,7 +3,7 @@ import logging
 from fastapi import FastAPI, Request, status
 from fastapi.responses import JSONResponse
 
-from aitester.api.routes import projects
+from aitester.api.routes import projects, test_runs
 from aitester.core.config import settings
 from aitester.core.exceptions import (
     AITesterError,
@@ -23,6 +23,7 @@ app = FastAPI(
 
 # Include Routers
 app.include_router(projects.router, prefix="/api/v1")
+app.include_router(test_runs.router, prefix="/api/v1")
 
 
 # Exception Handlers

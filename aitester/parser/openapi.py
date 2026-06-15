@@ -32,12 +32,18 @@ class OpenAPIParser:
         if "paths" not in self.spec:
             raise SpecValidationError("Missing 'paths' field in OpenAPI spec.")
 
-    def parse(self) -> list[ParsedEndpoint]:
+    def parse(self) -> "ParsedSpec":
         """
-        Parses the entire specification and returns a list of ParsedEndpoint objects.
+        Parses the entire specification and returns a ParsedSpec object.
         """
+        from aitester.parser.models import ParsedSpec
+        
         endpoints = []
         paths = self.spec.get("paths", {})
+        
+        info = self.spec.get("info", {})
+        title = info.get("title", "Unknown API")
+        version = info.get("version", "1.0.0")
         
         for path, path_item in paths.items():
             if not isinstance(path_item, dict):
@@ -74,7 +80,11 @@ class OpenAPIParser:
                 )
                 endpoints.append(endpoint)
 
-        return endpoints
+        return ParsedSpec(
+            title=title,
+            version=version,
+            endpoints=endpoints,
+        )
 
     def _parse_parameters(self, parameters_list: list[dict[str, Any]]) -> list[ParsedParameter]:
         parsed = []

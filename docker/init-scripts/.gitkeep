@@ -1,0 +1,2 @@
+# placeholder — add custom SQL init scripts here if needed
+# e.g., 01_extensions.sql to enable pg_trgm, uuid-ossp, etc.

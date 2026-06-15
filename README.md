@@ -1,5 +1,10 @@
 # AITester — AI-Powered Universal API Testing Platform
 
+[![CI](https://github.com/your-username/aitester/actions/workflows/ci.yml/badge.svg)](https://github.com/your-username/aitester/actions/workflows/ci.yml)
+[![Coverage](https://img.shields.io/badge/Coverage-75%25-brightgreen.svg)]()
+[![Python 3.12+](https://img.shields.io/badge/python-3.12+-blue.svg)](https://www.python.org/downloads/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 > Give it your OpenAPI spec. Get back hundreds of tests, a security audit,
 > and AI-powered failure analysis — automatically.
 

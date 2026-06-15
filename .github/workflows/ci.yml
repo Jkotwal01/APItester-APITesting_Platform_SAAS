@@ -1,0 +1,72 @@
+name: CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    services:
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_USER: aitester
+          POSTGRES_PASSWORD: password
+          POSTGRES_DB: aitester
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.13'
+        cache: 'pip'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt || echo "No requirements.txt, using pyproject.toml"
+        pip install -e .[dev,test] || pip install pytest pytest-asyncio pytest-cov httpx sqlalchemy asyncpg
+
+    - name: Run linting
+      run: |
+        pip install ruff mypy
+        ruff check aitester/
+        mypy aitester/ --ignore-missing-imports
+
+    - name: Run tests with coverage
+      env:
+        DATABASE_URL: postgresql+asyncpg://aitester:password@localhost:5432/aitester
+        REDIS_URL: redis://localhost:6379/0
+      run: |
+        pytest tests/ --cov=aitester --cov-report=xml --cov-fail-under=72
+
+  docker:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Build Docker image
+      run: docker build -f docker/Dockerfile -t aitester:ci-test .

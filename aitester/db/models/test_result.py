@@ -1,8 +1,8 @@
 import uuid
 from typing import TYPE_CHECKING, Any
 
-from sqlalchemy import JSON, Boolean, Float, ForeignKey, Text
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy import Boolean, Float, ForeignKey, Text
+from sqlalchemy.dialects.postgresql import UUID, JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from aitester.db.base import Base, TimestampMixin
@@ -32,7 +32,7 @@ class TestResult(TimestampMixin, Base):
 
     # AI Failure Analysis
     ai_failure_analysis: Mapped[dict[str, Any] | None] = mapped_column(
-        JSON, nullable=True, comment="Structured failure reason from Gemini"
+        JSONB, nullable=True, comment="Structured failure reason from Gemini"
     )
 
     test_run: Mapped["TestRun"] = relationship("TestRun", back_populates="test_results")

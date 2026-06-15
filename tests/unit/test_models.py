@@ -128,7 +128,11 @@ class TestDatabaseModels:
         )
         db_session.add(report)
         await db_session.flush()
+        await db_session.refresh(report)
 
         assert report.id is not None
         assert report.security_score == 95.5
+        assert report.ai_executive_summary is not None, (
+            "ai_executive_summary was None after flush — check DB driver / JSONB support"
+        )
         assert report.ai_executive_summary["risk_level"] == "LOW"

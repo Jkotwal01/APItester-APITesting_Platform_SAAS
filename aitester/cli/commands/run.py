@@ -77,8 +77,8 @@ async def execute_pipeline(spec_path: str, base_url: str, enable_ai: bool):
 
 
 def run(
-    spec: str = typer.Argument(..., help="Path or URL to OpenAPI spec"),
-    base_url: str = typer.Argument(..., help="Target API Base URL"),
+    spec: str = typer.Option(..., "--spec", help="Path or URL to OpenAPI spec"),
+    base_url: str = typer.Option(..., "--base-url", help="Target API Base URL"),
     ai: bool = typer.Option(False, "--ai", help="Enable Gemini AI logic generation")
 ):
     """Run the complete AITester pipeline against an API."""

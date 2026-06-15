@@ -12,6 +12,32 @@ version: "3.9"
 # ─────────────────────────────────────────────────────────────────────────────
 
 services:
+  app:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    image: aitester:latest
+    container_name: aitester_app
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://aitester:password@postgres:5432/aitester
+      - REDIS_URL=redis://redis:6379/0
+      - ENVIRONMENT=production
+      - GEMINI_API_KEY=${GEMINI_API_KEY:-}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - aitester-net
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
 
   # ─── PostgreSQL 16 ──────────────────────────────────────────────────────────
   postgres:

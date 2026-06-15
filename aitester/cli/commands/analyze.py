@@ -6,7 +6,7 @@ from aitester.parser.parser import parse_spec
 
 console = Console()
 
-def analyze(spec: str = typer.Argument(..., help="Path or URL to OpenAPI spec")):
+def analyze(spec: str = typer.Option(..., "--spec", help="Path or URL to OpenAPI spec")):
     """Parse and display a summary of the OpenAPI specification."""
     with console.status("[bold green]Loading spec..."):
         parsed = parse_spec(spec)

@@ -4,7 +4,7 @@ import pytest
 
 from aitester.ai.business_logic import BusinessLogicGenerator
 from aitester.parser.models import ParsedEndpoint, ParsedParameter
-from aitester.ai.validators import BusinessLogicOutput
+from aitester.ai.validators import AITestCase
 
 @pytest.fixture
 def simple_endpoint():
@@ -12,7 +12,9 @@ def simple_endpoint():
         path="/orders",
         method="POST",
         parameters=[
-            ParsedParameter(name="user_id", in_="query", required=True, schema_={"type": "integer"})
+            ParsedParameter.model_validate(
+                {"name": "user_id", "in": "query", "required": True, "schema": {"type": "integer"}}
+            )
         ],
         summary="Create a new order"
     )
@@ -21,15 +23,21 @@ def simple_endpoint():
 async def test_ai_generator_success(simple_endpoint):
     # Mock AI response
     mock_payload = [
-        BusinessLogicOutput(
+        AITestCase(
             name="Idempotency",
-            expected_status="409",
+            description="Test idempotency",
+            method="POST",
+            path="/orders",
+            expected_status=409,
             query_params={"user_id": 123},
             request_body={"item": "apple"}
         ),
-        BusinessLogicOutput(
+        AITestCase(
             name="State Flow",
-            expected_status="422",
+            description="Test state flow",
+            method="POST",
+            path="/orders",
+            expected_status=422,
             query_params={"user_id": 123},
             request_body={"item": "apple", "quantity": -5}
         )

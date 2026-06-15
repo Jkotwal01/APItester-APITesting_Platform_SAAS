@@ -1,8 +1,8 @@
 import uuid
 from typing import TYPE_CHECKING, Any
 
-from sqlalchemy import JSON, Float, ForeignKey, String
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy import Float, ForeignKey, String
+from sqlalchemy.dialects.postgresql import UUID, JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from aitester.db.base import Base, TimestampMixin
@@ -31,7 +31,7 @@ class Report(TimestampMixin, Base):
     # Overall Scores
     security_score: Mapped[float] = mapped_column(Float, default=0.0)
     ai_executive_summary: Mapped[dict[str, Any] | None] = mapped_column(
-        JSON, nullable=True, comment="AI-generated high-level summary of the run"
+        JSONB, nullable=True, comment="AI-generated high-level summary of the run"
     )
 
     test_run: Mapped["TestRun"] = relationship("TestRun", back_populates="reports")

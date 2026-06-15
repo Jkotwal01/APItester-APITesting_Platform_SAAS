@@ -1,8 +1,8 @@
 import uuid
 from typing import TYPE_CHECKING, Any
 
-from sqlalchemy import JSON, String
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy import String
+from sqlalchemy.dialects.postgresql import UUID, JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from aitester.db.base import Base, TimestampMixin
@@ -18,7 +18,7 @@ class Project(TimestampMixin, Base):
     name: Mapped[str] = mapped_column(String(255), nullable=False)
     description: Mapped[str | None] = mapped_column(String, nullable=True)
     openapi_spec: Mapped[dict[str, Any] | None] = mapped_column(
-        JSON, nullable=True, comment="Parsed OpenAPI Spec as JSON"
+        JSONB, nullable=True, comment="Parsed OpenAPI Spec as JSON"
     )
 
     test_runs: Mapped[list["TestRun"]] = relationship(

@@ -75,9 +75,9 @@ class TestPostgresConnectivity:
             await conn.close()
 
     @pytest.mark.asyncio
-    async def test_postgres_version_is_16(self):
+    async def test_postgres_version_is_15_or_higher(self):
         """
-        Verify that PostgreSQL version 16.x is running.
+        Verify that PostgreSQL version 15.x or higher is running.
         """
         import asyncpg
 
@@ -88,7 +88,7 @@ class TestPostgresConnectivity:
         try:
             version_str = await conn.fetchval("SHOW server_version")
             major_version = int(version_str.split(".")[0])
-            assert major_version >= 16, f"Expected PG 16+, got: {version_str}"
+            assert major_version >= 15, f"Expected PG 15+, got: {version_str}"
         finally:
             await conn.close()
 

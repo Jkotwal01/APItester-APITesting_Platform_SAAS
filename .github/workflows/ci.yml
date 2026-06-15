@@ -12,7 +12,7 @@ jobs:
     
     services:
       postgres:
-        image: postgres:15-alpine
+        image: postgres:16-alpine
         env:
           POSTGRES_USER: aitester
           POSTGRES_PASSWORD: password
@@ -47,7 +47,7 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt || echo "No requirements.txt, using pyproject.toml"
-        pip install -e .[dev,test] || pip install pytest pytest-asyncio pytest-cov httpx sqlalchemy asyncpg
+        pip install -e .[dev,test] || pip install pytest pytest-asyncio pytest-cov pytest-mock httpx sqlalchemy asyncpg
 
     - name: Run linting
       run: |
@@ -60,6 +60,7 @@ jobs:
         DATABASE_URL: postgresql+asyncpg://aitester:password@localhost:5432/aitester
         REDIS_URL: redis://localhost:6379/0
       run: |
+        alembic upgrade head
         pytest tests/ --cov=aitester --cov-report=xml --cov-fail-under=72
 
   docker:

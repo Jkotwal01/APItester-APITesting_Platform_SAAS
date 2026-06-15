@@ -74,53 +74,54 @@ class TestBusinessLogicValidation:
 
 class TestAIClientMocked:
     @pytest.mark.asyncio
-    async def test_client_retries_on_json_error(self, mocker):
+    async def test_client_retries_on_json_error(self):
         """Client should retry up to 3x before raising."""
+        import os
+        from unittest.mock import AsyncMock, patch
+
         from aitester.ai.client import GeminiClient
-        mocker.patch.dict("os.environ", {"GEMINI_API_KEY": "test_key"})
-        client = GeminiClient()
 
-        # Mock the underlying model to return invalid JSON twice, then valid
-        valid_response = json.dumps({"test_cases": []})
+        with patch.dict(os.environ, {"GEMINI_API_KEY": "test_key"}):
+            client = GeminiClient()
 
-        # We need to mock the generate_content_async method
-        class MockResponse:
-            def __init__(self, text):
-                self.text = text
+            # Mock the underlying model to return invalid JSON twice, then valid
+            valid_response = json.dumps({"test_cases": []})
 
-        mock_model = mocker.patch.object(
-            client.model,
-            "generate_content_async",
-            side_effect=[
+            class MockResponse:
+                def __init__(self, text):
+                    self.text = text
+
+            mock_call = AsyncMock(side_effect=[
                 MockResponse("not json"),
                 MockResponse("still bad"),
-                MockResponse(valid_response)
-            ]
-        )
+                MockResponse(valid_response),
+            ])
 
-        result = await client.generate_with_retry("test prompt", validate_business_logic_output)
+            with patch.object(client.model, "generate_content_async", mock_call):
+                result = await client.generate_with_retry("test prompt", validate_business_logic_output)
 
-        assert mock_model.call_count == 3
-        assert result == []
+            assert mock_call.call_count == 3
+            assert result == []
 
     @pytest.mark.asyncio
-    async def test_client_raises_after_max_retries(self, mocker):
+    async def test_client_raises_after_max_retries(self):
+        import os
+        from unittest.mock import AsyncMock, patch
+
         from aitester.ai.client import GeminiClient
         from aitester.core.exceptions import AIOutputValidationError
-        mocker.patch.dict("os.environ", {"GEMINI_API_KEY": "test_key"})
-        client = GeminiClient()
 
-        class MockResponse:
-            def __init__(self, text):
-                self.text = text
+        with patch.dict(os.environ, {"GEMINI_API_KEY": "test_key"}):
+            client = GeminiClient()
 
-        mock_model = mocker.patch.object(
-            client.model,
-            "generate_content_async",
-            return_value=MockResponse("bad json")
-        )
+            class MockResponse:
+                def __init__(self, text):
+                    self.text = text
 
-        with pytest.raises(AIOutputValidationError):
-            await client.generate_with_retry("test prompt", validate_business_logic_output, max_retries=2)
+            mock_call = AsyncMock(return_value=MockResponse("bad json"))
 
-        assert mock_model.call_count == 2
+            with patch.object(client.model, "generate_content_async", mock_call):
+                with pytest.raises(AIOutputValidationError):
+                    await client.generate_with_retry("test prompt", validate_business_logic_output, max_retries=2)
+
+            assert mock_call.call_count == 2

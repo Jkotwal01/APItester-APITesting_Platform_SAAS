@@ -3,6 +3,7 @@ Async SQLAlchemy Engine and Session configuration.
 """
 
 from collections.abc import AsyncGenerator
+from typing import Any
 
 from sqlalchemy.ext.asyncio import (
     AsyncEngine,
@@ -15,7 +16,7 @@ from sqlalchemy.pool import NullPool
 from aitester.core.config import settings
 
 # Define pool arguments dynamically based on environment
-pool_kwargs = {}
+pool_kwargs: dict[str, Any] = {}
 if getattr(settings, "ENVIRONMENT", "").lower() == "testing" or "test" in settings.DATABASE_URL:
     pool_kwargs["poolclass"] = NullPool
 else:
